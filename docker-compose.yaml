@@ -1,0 +1,29 @@
+version: '3'
+services:
+  mongo1:
+    container_name: mongo1
+    image: mongo:7.0.4
+    ports:
+      - 27017:27017
+    command: mongod --replSet myReplicaSet --bind_ip localhost,mongo1
+  mongo2:
+    container_name: mongo2
+    image: mongo:7.0.4
+    ports:
+      - 27018:27017
+    command: mongod --replSet myReplicaSet --bind_ip localhost,mongo2
+  mongo3:
+    container_name: mongo3
+    image: mongo:7.0.4
+    ports:
+      - 27019:27017
+    command: mongod --replSet myReplicaSet --bind_ip localhost,mongo3
+  app:
+    container_name: app
+    build: .
+    ports:
+      - 3000:3000
+    environment:
+      - APP_PORT=3000
+      - MONGO_URI=mongodb://mongo1:27017/?directConnection=true
+      - MONGO_DB_NAME=playground
