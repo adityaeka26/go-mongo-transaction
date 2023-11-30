@@ -10,9 +10,7 @@ import (
 	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readconcern"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 )
 
 type env struct {
@@ -88,7 +86,6 @@ func main() {
 		result, err := session.WithTransaction(
 			ctx,
 			callback,
-			// options.Transaction().SetWriteConcern(writeconcern.Majority()).SetReadConcern(readconcern.Snapshot()),
 		)
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(map[string]any{
@@ -139,7 +136,6 @@ func main() {
 		result, err := session.WithTransaction(
 			ctx,
 			callback,
-			options.Transaction().SetWriteConcern(writeconcern.Majority()).SetReadConcern(readconcern.Snapshot()),
 		)
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(map[string]any{
