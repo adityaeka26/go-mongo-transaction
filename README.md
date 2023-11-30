@@ -14,6 +14,6 @@ Simple MongoDB transaction implementation in Golang.
     ```
     ./init.sh
     ```
-3. Access these endpoint APIs:
+3. Access these API endpoints:
    - /transaction/success
    - /transaction/error
