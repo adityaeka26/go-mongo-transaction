@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type env struct {
@@ -55,32 +56,45 @@ func main() {
 
 		session, err := mongoClient.StartSession()
 		if err != nil {
-			return err
+			return c.Status(http.StatusInternalServerError).JSON(map[string]any{
+				"success": false,
+				"data":    err.Error(),
+			})
 		}
 		defer session.EndSession(ctx)
 
 		callback := func(sessionContext mongo.SessionContext) (any, error) {
 			ctx := mongo.NewSessionContext(ctx, session)
 
-			_, err := mongoClient.Database(env.MongoDbName).Collection("users").InsertOne(ctx, map[string]string{
+			password, err := bcrypt.GenerateFromPassword([]byte("goat"), bcrypt.DefaultCost)
+			if err != nil {
+				return nil, err
+			}
+			_, err = mongoClient.Database(env.MongoDbName).Collection("users").InsertOne(ctx, map[string]string{
 				"name":        "Leo Messi",
 				"age":         "34",
 				"nationality": "Argentina",
+				"password":    string(password),
 			})
 			if err != nil {
 				return nil, err
 			}
 
+			password, err = bcrypt.GenerateFromPassword([]byte("brazil"), bcrypt.DefaultCost)
+			if err != nil {
+				return nil, err
+			}
 			_, err = mongoClient.Database(env.MongoDbName).Collection("users").InsertOne(ctx, map[string]string{
 				"name":        "Neymar",
 				"age":         "31",
 				"nationality": "Brazil",
+				"password":    string(password),
 			})
 			if err != nil {
 				return nil, err
 			}
 
-			return nil, nil
+			return "transaction success", nil
 		}
 
 		result, err := session.WithTransaction(
@@ -104,33 +118,47 @@ func main() {
 
 		session, err := mongoClient.StartSession()
 		if err != nil {
-			return err
+			return c.Status(http.StatusInternalServerError).JSON(map[string]any{
+				"success": false,
+				"data":    err.Error(),
+			})
 		}
 		defer session.EndSession(ctx)
 
 		callback := func(sessionContext mongo.SessionContext) (any, error) {
 			ctx := mongo.NewSessionContext(ctx, session)
 
-			_, err := mongoClient.Database(env.MongoDbName).Collection("users").InsertOne(ctx, map[string]string{
+			password, err := bcrypt.GenerateFromPassword([]byte("goat"), bcrypt.DefaultCost)
+			if err != nil {
+				return nil, err
+			}
+			_, err = mongoClient.Database(env.MongoDbName).Collection("users").InsertOne(ctx, map[string]string{
 				"name":        "Leo Messi",
 				"age":         "34",
 				"nationality": "Argentina",
+				"password":    string(password),
 			})
 			if err != nil {
 				return nil, err
 			}
 
+			password, err = bcrypt.GenerateFromPassword([]byte("brazil"), bcrypt.DefaultCost)
+			// error simulation
+			err = errors.New("error simulation")
+			if err != nil {
+				return nil, err
+			}
 			_, err = mongoClient.Database(env.MongoDbName).Collection("users").InsertOne(ctx, map[string]string{
 				"name":        "Neymar",
 				"age":         "31",
 				"nationality": "Brazil",
+				"password":    string(password),
 			})
-			err = errors.New("simulasi error")
 			if err != nil {
 				return nil, err
 			}
 
-			return nil, nil
+			return "transaction success", nil
 		}
 
 		result, err := session.WithTransaction(
